@@ -6,7 +6,7 @@
         *@desc Current album object retrieved from fixtures
         *@type {Object}
         */
-        var currentAlbum = Fixtures.getAlbum;
+        var currentAlbum = Fixtures.getAlbum();
         /**
         *@function getSongIndex
         *@desc Gets index of a song
@@ -78,7 +78,6 @@
                 
             } else if (SongPlayer.currentSong === song) {
             if (currentBuzzObject.isPaused()) {
-                
                 playSong(song);
                 }
             }
@@ -137,5 +136,5 @@
     
     angular
         .module('blocJams')
-        .factory('SongPlayer', ['$rootScope', 'Fixtures', SongPlayer]);
+        .factory('SongPlayer', ['Fixtures', SongPlayer]);
 })();
