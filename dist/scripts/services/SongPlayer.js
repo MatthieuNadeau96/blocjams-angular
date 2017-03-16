@@ -1,5 +1,5 @@
 (function () {
-    function SongPlayer(Fixtures) {
+    function SongPlayer($rootScope, Fixtures) {
         
         var SongPlayer = {};
         /**
@@ -8,24 +8,35 @@
         */
         var currentAlbum = Fixtures.getAlbum();
         /**
-        *@function getSongIndex
-        *@desc Gets index of a song
-        *@type {Object} song
+        *@desc Buzz object audio file
+        *@type {Object}
         */
-        var getSongIndex = function(song) {
-            return currentAlbum.songs.indexOf(song);
-        };
+        var currentBuzzObject = null;
         /**
         *@desc Active song object from list of songs
         *@type {Object}
         */
         SongPlayer.currentSong = null;
         /**
-        *@desc Buzz object audio file
-        *@type {Object}
+        *@desc Current playback time (in seconds) of currently playing song
+        *@type {Number}
         */
-        var currentBuzzObject = null;
-        
+        SongPlayer.currentTime = null;
+        /**
+        *@desc Volume used for songs
+        *@type {Number}
+        */
+        SongPlayer.volume = 80;
+        /**
+        *@function setCurrentTime
+        *@desc Set current time (in seconds) of currently playing song
+        *@param {number} time
+        */
+        SongPlayer.setCurrentTime = function(time) {
+            if (currentBuzzObject) {
+                currentBuzzObject.setTime(time);
+            }
+        };
         /**
         * @function setSong
         * @desc Stops currently playing song and loads new audio file as currentBuzzObject
@@ -39,6 +50,12 @@
                 currentBuzzObject = new buzz.sound(song.audioUrl, {
                     formats: ['mp3'],
                     preload: true
+                });
+            
+                currentBuzzObject.bind('timeupdate', function() {
+                    $rootScope.$apply(function() {
+                        SongPlayer.currentTime = currentBuzzObject.getTime();
+                    });
                 });
                 
                 SongPlayer.currentSong = song;
@@ -60,6 +77,14 @@
         var stopSong = function(song) {
             currentBuzzObject.stop();
             song.playing = null;
+        };
+        /**
+        *@function getSongIndex
+        *@desc Gets index of a song
+        *@type {Object} song
+        */
+        var getSongIndex = function(song) {
+            return currentAlbum.songs.indexOf(song);
         };
         /**
         *@function play
@@ -129,6 +154,17 @@
                 playSong(song);
             }
         };
+        /**
+        *@function setVolume
+        *@desc Sets volume for songs
+        @param {Number} volume
+        */
+        SongPlayer.setVolume = function(volume) {
+            if (currentBuzzObject) {
+                currentBuzzObject.setVolume(volume);
+            }
+            SongPlayer.volume = volume;
+        };
         
         
         return SongPlayer;
@@ -136,5 +172,5 @@
     
     angular
         .module('blocJams')
-        .factory('SongPlayer', ['Fixtures', SongPlayer]);
+        .factory('SongPlayer', ['$rootScope', 'Fixtures', SongPlayer]);
 })();
